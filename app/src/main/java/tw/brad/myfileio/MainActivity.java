@@ -5,14 +5,17 @@ import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -20,7 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-    private File sdroot, approot;
+    private File sdroot, approot, dcimPath;
 
     private MyDBHelper dbHelper;
     private SQLiteDatabase database;
@@ -54,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void init(){
         sdroot = Environment.getExternalStorageDirectory();
+
+        dcimPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        Log.v("brad", "dcim:" + dcimPath.getAbsolutePath());
 
         File downloadPath = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS);
@@ -106,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test3(View view) {
+        // INSERT INTO sakura (cname,tel,birthday) VALUES ("brad", "0912-123456","1999-01-02");
         ContentValues values = new ContentValues();
         values.put("cname", "brad");
         values.put("tel", "0912-123456");
@@ -118,12 +125,35 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = database.query(
                 "sakura",null,null,null,null,null,null);
         while (cursor.moveToNext()){
-            String id = cursor.getString(0);
-            String cname = cursor.getString(1);
-            String tel = cursor.getString(2);
-            String birthday = cursor.getString(3);
+            String id = cursor.getString(cursor.getColumnIndex("id"));
+            String cname = cursor.getString(cursor.getColumnIndex("cname"));
+            String tel = cursor.getString(cursor.getColumnIndex("tel"));
+            String birthday = cursor.getString(cursor.getColumnIndex("birthday"));
             Log.v("brad", id + ":"+ cname + ":" + tel + ":" + birthday);
         }
 
+    }
+
+//    File file = new File(dcimPath, "Camera/IMG_20180808_171602.jpg");
+//    Uri contentUri = FileProvider.getUriForFile(this,
+//            "tw.brad.myfileio",
+//            file);
+//        Log.v("brad", contentUri.getPath());
+//        img.setImageURI(contentUri);
+
+
+    public void test5(View view) {
+        // DELECT FROM sakura WHERE id = 3 AND cname = 'brad'
+        database.delete("sakura", "id = ? AND cname = ?", new String[]{"3","brad"});
+        test4(null);
+    }
+
+    public void test6(View view) {
+        // UPDATE sakua SET cname = 'peter', tel = '321' WHERE id = 5;
+        ContentValues values = new ContentValues();
+        values.put("cname", "peter");
+        values.put("tel", "321");
+        database.update("sakura", values, "id = ?", new String[]{"5"});
+        test4(null);
     }
 }
