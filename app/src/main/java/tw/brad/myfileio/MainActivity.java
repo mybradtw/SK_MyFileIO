@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             approot.mkdirs();
         }
 
-        dbHelper = new MyDBHelper(this, "brad", null,1);
+        dbHelper = new MyDBHelper(this, "brad", null,3);
         database = dbHelper.getReadableDatabase();
 
     }
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
     public void test3(View view) {
         // INSERT INTO sakura (cname,tel,birthday) VALUES ("brad", "0912-123456","1999-01-02");
         ContentValues values = new ContentValues();
-        values.put("cname", "brad");
+        values.put("cname", "tony");
         values.put("tel", "0912-123456");
         values.put("birthday", "1999-01-02");
         database.insert("sakura", null, values);
@@ -122,14 +122,31 @@ public class MainActivity extends AppCompatActivity {
 
     public void test4(View view) {
         // SELECT * FROM sakura
+        // SELECT id, cname as myname, tel FROM sakura
+        // SELECT id, cname as myname, tel FROM sakura WHERE id > 1
+        // SELECT id, cname as myname, tel FROM sakura WHERE id > 1 ORDER BY myname desc LIMIT 2,4
+//        Cursor cursor = database.query(
+//                "sakura",
+//                new String[]{"id","cname as myname","tel"},
+//                "id > ?",
+//                new String[]{"1"},
+//                null,
+//                null,
+//                "myname desc LIMIT 2, 4");
         Cursor cursor = database.query(
-                "sakura",null,null,null,null,null,null);
+                "sakura",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
         while (cursor.moveToNext()){
             String id = cursor.getString(cursor.getColumnIndex("id"));
             String cname = cursor.getString(cursor.getColumnIndex("cname"));
             String tel = cursor.getString(cursor.getColumnIndex("tel"));
-            String birthday = cursor.getString(cursor.getColumnIndex("birthday"));
-            Log.v("brad", id + ":"+ cname + ":" + tel + ":" + birthday);
+//            String birthday = cursor.getString(cursor.getColumnIndex("birthday"));
+            Log.v("brad", id + ":"+ cname + ":" + tel + ":");
         }
 
     }
@@ -156,4 +173,58 @@ public class MainActivity extends AppCompatActivity {
         database.update("sakura", values, "id = ?", new String[]{"5"});
         test4(null);
     }
+
+    public void test7(View view){
+        // INSERT INTO myorder (sid,pname,qty) VALUES (4, "abc", 2);
+        ContentValues values = new ContentValues();
+        values.put("sid", "7");
+        values.put("pname", "abc_" + (int)(Math.random()*10));
+        values.put("qty", "2");
+        database.insert("myorder", null, values);
+
+        // SELECT * FROM myorder
+        Cursor cursor = database.query(
+                "myorder",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        while (cursor.moveToNext()){
+            String id = cursor.getString(cursor.getColumnIndex("id"));
+            String sid = cursor.getString(cursor.getColumnIndex("sid"));
+            String pname = cursor.getString(cursor.getColumnIndex("pname"));
+            Log.v("brad", id + ":"+ sid + ":" + pname + ":");
+        }
+    }
+
+    public void test8(View view){
+        // SELECT * FROM sakura,myorder WHERE sakura.id = myorder.sid
+        Cursor cursor = database.query(
+                "sakura,myorder",
+                null,
+                "sakura.id = myorder.sid",
+                null,
+                null,
+                null,
+                null);
+        int count = cursor.getCount();
+        Log.v("brad", "count = " + count);
+        String[] fields = cursor.getColumnNames();
+        for (String field : fields){
+            Log.v("brad", field);
+        }
+        Log.v("brad", "------");
+        while (cursor.moveToNext()){
+            String sid = cursor.getString(cursor.getColumnIndex("sid"));
+            String cname = cursor.getString(cursor.getColumnIndex("cname"));
+            String pname = cursor.getString(cursor.getColumnIndex("pname"));
+            String qty = cursor.getString(cursor.getColumnIndex("qty"));
+            Log.v("brad", sid + ":" + cname + ":" + pname + ":" + qty);
+        }
+
+    }
+
+
 }
